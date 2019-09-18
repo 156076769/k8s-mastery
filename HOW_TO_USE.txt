@@ -1,0 +1,89 @@
+k8s 30分钟入门：https://mp.weixin.qq.com/s?__biz=Mzg3ODAzMTMyNQ==&mid=2247484000&idx=1&sn=7718a841aeec67829d323615051f69fd&chksm=cf18bad2f86f33c4f564f8c23de3ed81473179b4d7dc36d45aded47f1fcbd68a365052fe7172&token=1094567617&lang=zh_CN&scene=21#wechat_redirect
+
+-----
+
+国内镜像替换gcr.io
+registry.cn-hangzhou.aliyuncs.com/google_containers
+
+
+VirtualBox无法start, 试试yum install kernel-headers-$(uname -r) kernel-devel-$(uname -r) -y
+https://www.playezu.com/build-ev/16183.html
+
+中国local不翻墙安装minikube
+https://yq.aliyun.com/articles/221687
+minikube start --registry-mirror=https://docker.mirrors.ustc.edu.cn --vm-driver=none
+minikube service list
+
+minikube一定要移到/usr/local/bin下面，目前安装在251上面
+sudo mv minikube /usr/local/bin/
+
+java -jar sentiment-analysis-web-0.0.1-SNAPSHOT.jar --sa.logic.api.url=http://localhost:5000
+
+我在Docker HUB上的ID：
+jinhuialpha/jjd.../156076769@qq.com
+
+docker login -u="jinhuialpha" -p="j...4"
+
+-----
+
+docker build -f Dockerfile -t jinhuialpha/sentiment-analysis-frontend:v1 .
+docker build -f Dockerfile -t jinhuialpha/sentiment-analysis-frontend:minikube4 .
+
+docker push jinhuialpha/sentiment-analysis-frontend:v1
+docker push jinhuialpha/sentiment-analysis-frontend:minikube4
+
+docker pull jinhuialpha/sentiment-analysis-frontend:v1
+docker pull jinhuialpha/sentiment-analysis-frontend:minikube4
+
+docker run -d -p 3000:80 jinhuialpha/sentiment-analysis-frontend:v1
+
+-----
+
+docker build -f Dockerfile -t jinhuialpha/sentiment-analysis-web-app:v3 .
+
+docker push jinhuialpha/sentiment-analysis-web-app:v3
+
+docker pull jinhuialpha/sentiment-analysis-web-app:v3
+
+docker run -d -p 8080:8080 -e SA_LOGIC_API_URL='http://<container_ip or docker machine ip>:5000' jinhuialpha/sentiment-analysis-web-app:v3
+
+-----
+
+docker build -f Dockerfile -t jinhuialpha/sentiment-analysis-logic:v1 .
+
+docker push jinhuialpha/sentiment-analysis-logic:v1
+
+-----
+
+kubectl apply -f sa-frontend-deployment.yaml
+
+-----
+
+curl -i -X OPTIONS http://192.168.0.251:30296 -v
+
+
+-----
+
+minikube dashboard:
+kubectl proxy --address='0.0.0.0' --accept-hosts='^*$'
+http://192.168.0.251:8001/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/#!/overview?namespace=default
+
+------
+
+K8S Volume
+https://www.cnblogs.com/benjamin77/p/9940266.html
+kubectl edit --namespace=kube-system pod kube-apiserver-k8s-minikube
+
+------
+
+helm
+https://blog.csdn.net/bbwangj/article/details/81087911
+https://www.kubernetes.org.cn/3435.html
+# 创建服务端
+helm init --service-account tiller --upgrade -i registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.9.1 --stable-repo-url https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts
+# 创建TLS认证服务端，参考地址：https://github.com/gjmzj/kubeasz/blob/master/docs/guide/helm.md
+helm init --service-account tiller --upgrade -i registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.9.1 --tiller-tls-cert /etc/kubernetes/ssl/tiller001.pem --tiller-tls-key /etc/kubernetes/ssl/tiller001-key.pem --tls-ca-cert /etc/kubernetes/ssl/ca.pem --tiller-namespace kube-system --stable-repo-url https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts
+
+------
+(Heapster+Grafana+InfluxDB) - 监控kubernetes
+https://www.cnblogs.com/scode2/p/8810052.html

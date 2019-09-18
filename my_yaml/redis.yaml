@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: hello-redis
+  namespace: my-kube
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        group: hello-scm
+        my-kube: hello-redis
+        k8s-app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:latest
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    group: hello-scm
+    kubernetes.io/cluster-service: 'true'
+    kubernetes.io/name: hello-redis
+  name: hello-redis
+  namespace: my-kube
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    k8s-app: redis
