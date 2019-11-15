@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: my-external-service
+spec:
+  type: NodePort #指定service类型
+  selector:
+    app: service_test_pod
+  ports:
+    - port: 93 #Service供集群中其它container访问端口
+      targetPort: 9999 #转向后端pod中container暴露的端口
+      nodePort: 31111 #节点暴露的端口

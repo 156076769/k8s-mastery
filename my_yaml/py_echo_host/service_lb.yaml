@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-lb-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 94
+    protocol: TCP
+    targetPort: 9999
+    nodePort: 31112
+  selector:
+    app: service_test_pod
+
